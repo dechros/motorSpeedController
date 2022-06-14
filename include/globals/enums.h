@@ -9,9 +9,14 @@
  * 
  */
 
+#ifndef ENUMS_H
+#define ENUMS_H
+
 enum LED_DIRECTION
 {
     ERROR_DIR,
     RISING_DIR,
     FALLING_DIR
 };
+
+#endif

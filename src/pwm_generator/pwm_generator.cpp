@@ -9,7 +9,7 @@
  * 
  */
 
-#include "pwm_generator.h"
+#include "pwm_generator/pwm_generator.h"
 
 PwmGenerator::PwmGenerator()
 {

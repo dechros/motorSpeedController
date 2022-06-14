@@ -9,7 +9,8 @@
  * 
  */
 
-#include <mbed.h>
+#ifndef PWM_GENERATOR_H
+#define PWM_GENERATOR_H
 
 #include "../globals/variables.h"
 
@@ -36,4 +37,4 @@ public:
     static void pwm_generator_thread();
 };
 
-
+#endif 
