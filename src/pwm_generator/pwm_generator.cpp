@@ -1,7 +1,7 @@
 /**
  * @file pwm_generator.cpp
  * @author Halit Cetin (halit.cetin@alten.com)
- * @brief This file includes PWM Generator class.
+ * @brief This file includes PWM Generator class related declerations.
  * @version 0.1
  * @date 2022-06-14
  *
@@ -13,7 +13,7 @@
 
 PwmOut *PwmGenerator::led_out;
 PwmOut *PwmGenerator::pwm_out;
-BufferedSerial *PwmGenerator::serial;
+SerialOutput *PwmGenerator::serial;
 
 PwmGenerator::PwmGenerator()
 {
@@ -29,13 +29,13 @@ PwmGenerator::~PwmGenerator()
     serial = NULL;
 }
 
-void PwmGenerator::set_pwm_pins(PinName led_pin, PinName output_pin)
+void PwmGenerator::set_pins(PinName led_pin, PinName output_pin)
 {
     led_out = new PwmOut(led_pin);
     pwm_out = new PwmOut(output_pin);
 }
 
-void PwmGenerator::set_serial_output(BufferedSerial *serial_p)
+void PwmGenerator::set_serial_output(SerialOutput *serial_p)
 {
     serial = serial_p;
 }
@@ -44,17 +44,17 @@ void PwmGenerator::start_thread()
 {
     if (led_out == NULL || pwm_out == NULL)
     {
-        char *message = "  ## Null PWM output object error.";
-        serial->write(message, 34);
+        serial->write("  ## Null PWM output object error.");
         while (true)
-            ;
+        {
+        }
     }
     else if (serial == NULL)
     {
-        char *message = "  ## Null serial output object error.";
-        serial->write(message, 37);
+        serial->write("  ## Null serial output object error.");
         while (true)
-            ;
+        {
+        }
     }
     else
     {
@@ -93,11 +93,10 @@ void PwmGenerator::pwm_generator_thread()
         }
         else
         {
-            pwm_dir = ERROR_DIR;
-            char *message = "  ## Led direction error.";
-            serial->write(message, 25);
+            serial->write("  ## Led direction error.");
             while (true)
-                ;
+            {
+            }
         }
 
         led_out->period_ms(pwm_period_ms);

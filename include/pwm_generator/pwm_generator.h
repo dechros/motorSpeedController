@@ -1,7 +1,7 @@
 /**
  * @file pwm_generator.h
  * @author Halit Cetin (halit.cetin@alten.com)
- * @brief This file includes PWM Generator class headers.
+ * @brief This file includes PWM Generator class related definitions.
  * @version 0.1
  * @date 2022-06-14
  * 
@@ -14,7 +14,8 @@
 
 #include <mbed.h>
 
-#include "../globals/variables.h"
+#include "globals/variables.h"
+#include "serial_output/serial_output.h"
 
 /**
  * @brief Used for deciding if the PWM generator task rising the PWM 
@@ -39,16 +40,26 @@ private:
     Thread thread;
     static PwmOut *led_out;
     static PwmOut *pwm_out;
-    static BufferedSerial *serial;
+    static SerialOutput *serial;
+
+    /**
+     * @brief PWM generator thread.
+     * 
+     * @details This thread is responsible from generating sample RPM signals
+     * as PWM. It is important that we are not changing the duty cycle. We are 
+     * changing the period of the PWM signal.
+     */
+    static void pwm_generator_thread();
+
 public: 
     /**
-     * @brief Construct a new PWM Generator objectç
+     * @brief Construct a new PWM Generator object.
      * 
      */
     PwmGenerator();
 
     /**
-     * @brief Destroy the PWM Generator objectç
+     * @brief Destroy the PWM Generator object.
      * 
      */
     ~PwmGenerator();
@@ -59,29 +70,20 @@ public:
      * @param led_pin Designated LED pin for visual
      * @param output_pin Designated PWM pin for measurement
      */
-    void set_pwm_pins(PinName led_pin, PinName output_pin);
+    void set_pins(PinName led_pin, PinName output_pin);
 
     /**
      * @brief Set the serial output object.
      * 
      * @param serial_p Designated serial output
      */
-    void set_serial_output(BufferedSerial *serial_p);
+    void set_serial_output(SerialOutput *serial_p);
 
     /**
      * @brief Starts the related thread.
      * 
      */
     void start_thread();
-
-    /**
-     * @brief PWM generator thread.
-     * 
-     * @details This thread is responsible from generating sample RPM signals
-     * as PWM. It is important that we are not changing the duty cycle. We are 
-     * changing the period of the PWM signal.
-     */
-    static void pwm_generator_thread();
 };
 
 #endif 
