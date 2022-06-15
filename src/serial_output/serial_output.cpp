@@ -21,6 +21,7 @@ SerialOutput::SerialOutput()
 
 SerialOutput::~SerialOutput()
 {
+    delete serial_hardware;
 }
 
 void SerialOutput::set_pins(PinName tx_pin, PinName rx_pin)

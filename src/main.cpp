@@ -30,10 +30,7 @@ int main()
     pwm_generator.start_thread();
 
     input.rise(&pwm_input_rise);
-    while (true)
-    {
-        ThisThread::yield();
-    }
+    ThisThread::sleep_for(osWaitForever);
 }
 
 void pwm_input_rise()

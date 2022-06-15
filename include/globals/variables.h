@@ -15,8 +15,6 @@
 #include <mbed.h>
 
 extern volatile bool interrupted;
-
 extern InterruptIn input;
-extern BufferedSerial serial;
 
 #endif

@@ -12,5 +12,4 @@
 #include "globals/variables.h"
 
 volatile bool interrupted = false;
-
 InterruptIn input(D8);
