@@ -12,11 +12,11 @@
 #ifndef ENUMS_H
 #define ENUMS_H
 
-enum LED_DIRECTION
+enum EXAMPLE_GLOBAL_ENUM
 {
-    ERROR_DIR,
-    RISING_DIR,
-    FALLING_DIR
+    ERROR_EXAMPLE,
+    RISING_EXAMPLE,
+    FALLING_EXAMPLE
 };
 
 #endif

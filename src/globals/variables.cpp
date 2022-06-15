@@ -14,4 +14,3 @@
 volatile bool interrupted = false;
 
 InterruptIn input(D8);
-BufferedSerial serial(USBTX, USBRX);

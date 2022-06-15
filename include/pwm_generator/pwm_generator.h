@@ -14,44 +14,68 @@
 
 #include <mbed.h>
 
-#include "../globals/enums.h"
 #include "../globals/variables.h"
 
+/**
+ * @brief Used for deciding if the PWM generator task rising the PWM 
+ * period or not.
+ * 
+ */
+enum PWM_PERIOD_DIR
+{
+    ERROR_DIR,
+    RISING_DIR,
+    FALLING_DIR
+};
+
+/**
+ * @brief Generates two same PWM signals in two different pins. One is 
+ * used for driving LED and other one is used for measuring purposes.
+ * 
+ */
 class PwmGenerator
 {
 private:
     Thread thread;
     static PwmOut *led_out;
     static PwmOut *pwm_out;
+    static BufferedSerial *serial;
 public: 
     /**
-     * @brief Construct a new PWM Generator object
+     * @brief Construct a new PWM Generator objectç
      * 
      */
     PwmGenerator();
 
     /**
-     * @brief Destroy the PWM Generator object
+     * @brief Destroy the PWM Generator objectç
      * 
      */
     ~PwmGenerator();
 
     /**
-     * @brief Set the PWM output pins
+     * @brief Set the PWM output pins.
      * 
-     * @param led_pin 
-     * @param output_pin 
+     * @param led_pin Designated LED pin for visual
+     * @param output_pin Designated PWM pin for measurement
      */
     void set_pwm_pins(PinName led_pin, PinName output_pin);
 
     /**
-     * @brief Starts the related thread
+     * @brief Set the serial output object.
+     * 
+     * @param serial_p Designated serial output
+     */
+    void set_serial_output(BufferedSerial *serial_p);
+
+    /**
+     * @brief Starts the related thread.
      * 
      */
     void start_thread();
 
     /**
-     * @brief PWM generator thread
+     * @brief PWM generator thread.
      * 
      * @details This thread is responsible from generating sample RPM signals
      * as PWM. It is important that we are not changing the duty cycle. We are 

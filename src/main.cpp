@@ -20,8 +20,10 @@ void pwm_input_rise();
 
 int main()
 {
+    BufferedSerial serial(USBTX, USBRX);
     PwmGenerator pwm_generator;
     pwm_generator.set_pwm_pins(LED1, D3);
+    pwm_generator.set_serial_output(&serial);
     pwm_generator.start_thread();
     input.rise(&pwm_input_rise);
     while (true)
