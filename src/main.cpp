@@ -21,6 +21,7 @@ void pwm_input_rise();
 int main()
 {
     PwmGenerator pwm_generator;
+    pwm_generator.set_pwm_pins(LED1, D3);
     pwm_generator.start_thread();
     input.rise(&pwm_input_rise);
     while (true)

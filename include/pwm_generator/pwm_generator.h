@@ -21,27 +21,37 @@ class PwmGenerator
 {
 private:
     Thread thread;
+    static PwmOut *led_out;
+    static PwmOut *pwm_out;
 public: 
     /**
-     * @brief Construct a new Pwm Generator object
+     * @brief Construct a new PWM Generator object
      * 
      */
     PwmGenerator();
 
     /**
-     * @brief Destroy the Pwm Generator object
+     * @brief Destroy the PWM Generator object
      * 
      */
     ~PwmGenerator();
 
     /**
-     * @brief Starts the related thread.
+     * @brief Set the PWM output pins
+     * 
+     * @param led_pin 
+     * @param output_pin 
+     */
+    void set_pwm_pins(PinName led_pin, PinName output_pin);
+
+    /**
+     * @brief Starts the related thread
      * 
      */
     void start_thread();
 
     /**
-     * @brief PWM generator thread.
+     * @brief PWM generator thread
      * 
      * @details This thread is responsible from generating sample RPM signals
      * as PWM. It is important that we are not changing the duty cycle. We are 

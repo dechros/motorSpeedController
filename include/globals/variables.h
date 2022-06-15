@@ -16,8 +16,6 @@
 
 extern volatile bool interrupted;
 
-extern PwmOut led;
-extern PwmOut pwm;
 extern InterruptIn input;
 extern BufferedSerial serial;
 

@@ -13,7 +13,5 @@
 
 volatile bool interrupted = false;
 
-PwmOut led(LED1);
-PwmOut pwm(D3);
 InterruptIn input(D8);
 BufferedSerial serial(USBTX, USBRX);
