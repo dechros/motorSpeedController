@@ -11,10 +11,8 @@
 
 #include "globals/variables.h"
 
-int period_ms = 0;
 volatile bool interrupted = false;
 
-LED_DIRECTION led_dir = RISING_DIR;
 PwmOut led(LED1);
 PwmOut pwm(D3);
 InterruptIn input(D8);

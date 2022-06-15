@@ -14,12 +14,8 @@
 
 #include <mbed.h>
 
-#include "enums.h"
-
-extern int period_ms;
 extern volatile bool interrupted;
 
-extern LED_DIRECTION led_dir;
 extern PwmOut led;
 extern PwmOut pwm;
 extern InterruptIn input;

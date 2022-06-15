@@ -20,13 +20,13 @@ void pwm_input_rise();
 
 int main()
 {
-    Thread pwm_generator_thread;
     PwmGenerator pwm_generator;
+    pwm_generator.start_thread();
     input.rise(&pwm_input_rise);
-    pwm_generator_thread.start(PwmGenerator::pwm_generator_thread);
-    ThisThread::yield();
-    char *message = "  ## Software error.";
-    serial.write(message, 20);
+    while (true)
+    {
+        ThisThread::yield();
+    }
 }
 
 void pwm_input_rise()

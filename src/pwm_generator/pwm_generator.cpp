@@ -13,14 +13,23 @@
 
 PwmGenerator::PwmGenerator()
 {
+    
 }
 
 PwmGenerator::~PwmGenerator()
 {
 }
 
+void PwmGenerator::start_thread()
+{
+    thread.start(PwmGenerator::pwm_generator_thread);
+}
+
 void PwmGenerator::pwm_generator_thread()
 {
+    LED_DIRECTION led_dir = RISING_DIR;
+    int period_ms = 0;
+
     while (1)
     {
         if (led_dir == RISING_DIR)
@@ -57,12 +66,5 @@ void PwmGenerator::pwm_generator_thread()
         pwm.period_ms(period_ms);
         pwm.write(0.50f);
         ThisThread::sleep_for(period_ms);
-
-        if (interrupted == true)
-        {
-            interrupted = false;
-            char *message = "Rise\r\n";
-            serial.write(message, 6);
-        }
     }
 }
