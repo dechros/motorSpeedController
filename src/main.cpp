@@ -20,15 +20,9 @@ void pwm_input_rise();
 
 int main()
 {
-    SerialOutput serial_output;
-    serial_output.set_pins(USBTX, USBRX);
-    serial_output.start_thread();
-
-    PwmGenerator pwm_generator;
-    pwm_generator.set_pins(LED1, D3);
-    pwm_generator.set_serial_output(&serial_output);
-    pwm_generator.start_thread();
-
+    serial_set_pins(USBTX, USBRX);
+    pwm_set_pins(LED1, D3);
+    pwm_start_thread();
     input.rise(&pwm_input_rise);
     ThisThread::sleep_for(osWaitForever);
 }
