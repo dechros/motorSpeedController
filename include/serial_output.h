@@ -14,6 +14,8 @@
 
 #include <mbed.h>
 #include <string>
+#include <iostream>
+#include <sstream>
     
 /**
  * @brief Set the UART com pins.

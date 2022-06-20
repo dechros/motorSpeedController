@@ -11,6 +11,9 @@
 
 #include "pwm_generator.h"
 
+#define PWM_PERIOD_MAX 100
+#define PWM_PERIOD_MIN 1
+
 Thread pwm_generate_thread;
 Mutex pwm_generate_mutex;
 PwmOut *led_pwm_out = NULL;
@@ -48,7 +51,7 @@ void pwm_generator_thread()
         pwm_generate_mutex.lock();
         if (pwm_dir == RISING_DIR)
         {
-            if (pwm_period_ms < 100)
+            if (pwm_period_ms < PWM_PERIOD_MAX)
             {
                 pwm_period_ms++;
             }
@@ -59,7 +62,7 @@ void pwm_generator_thread()
         }
         else if (pwm_dir == FALLING_DIR)
         {
-            if (pwm_period_ms > 1)
+            if (pwm_period_ms > PWM_PERIOD_MIN)
             {
                 pwm_period_ms--;
             }
@@ -77,6 +80,6 @@ void pwm_generator_thread()
         cable_pwm_out->period_ms(pwm_period_ms);
         cable_pwm_out->write(0.50f);
         pwm_generate_mutex.unlock();
-        ThisThread::sleep_for(pwm_period_ms);
+        ThisThread::sleep_for(PWM_PERIOD_MAX);
     }
 }

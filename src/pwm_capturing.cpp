@@ -4,14 +4,15 @@
  * @brief This file includes PWM capturing related declerations.
  * @version 0.1
  * @date 2022-06-17
- * 
+ *
  * @copyright Copyright (c) 2022
- * 
+ *
  */
 
 #include "pwm_capturing.h"
 
-bool interrupted = false;
+int rpm = 0;
+int pulse_counter = 0;
 
 Thread pwm_capture_thread;
 Mutex pwm_capture_mutex;
@@ -43,7 +44,7 @@ void pwm_capturing_start_thread()
 
 void pwm_input_rise()
 {
-    interrupted = true;
+    pulse_counter++;
 }
 
 void pwm_capturing_thread()
@@ -51,12 +52,10 @@ void pwm_capturing_thread()
     while (true)
     {
         pwm_capture_mutex.lock();
-        if (interrupted == true)
-        {
-            interrupted = false;
-            serial_write("Pulse.");
-        }
+        rpm = pulse_counter * 600;
+        pulse_counter = 0;
+        /* serial_write("rpm : " + to_string(rpm)); */
         pwm_capture_mutex.unlock();
-        ThisThread::yield();
+        ThisThread::sleep_for(100);
     }
 }
