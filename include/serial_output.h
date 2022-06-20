@@ -14,9 +14,6 @@
 
 #include <mbed.h>
 #include <string>
-
-extern Mutex serial_mutex;
-extern UnbufferedSerial *serial_hardware;
     
 /**
  * @brief Set the UART com pins.

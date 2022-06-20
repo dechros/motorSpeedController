@@ -11,5 +11,4 @@
 
 #include "variables.h"
 
-volatile bool interrupted = false;
-InterruptIn input(D8);
+bool example = false;

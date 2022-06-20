@@ -17,10 +17,6 @@
 #include "variables.h"
 #include "serial_output.h"
 
-extern Thread pwm_capture_thread;
-extern Mutex pwm_capture_mutex;
-extern DigitalIn *pwm_in;
-
 /**
  * @brief Set the PWM input pin.
  * 
@@ -29,17 +25,23 @@ extern DigitalIn *pwm_in;
 void pwm_capturing_set_pin(PinName input_pin);
 
 /**
+ * @brief Starts the related thread.
+ * 
+ */
+void pwm_capturing_start_thread();
+
+/**
+ * @brief Interrupt function for PWM input.
+ * 
+ */
+void pwm_input_rise();
+
+/**
  * @brief PWM capture thread.
  * 
  * @details This thread is responsible from capturing sample RPM signals
  * as PWM.
  */
 void pwm_capturing_thread();
-
-/**
- * @brief Starts the related thread.
- * 
- */
-void pwm_capturing_start_thread();
 
 #endif

@@ -29,11 +29,6 @@ enum PWM_PERIOD_DIR
     FALLING_DIR
 };
 
-extern Thread pwm_generate_thread;
-extern Mutex pwm_generate_mutex;
-extern PwmOut *led_pwm_out;
-extern PwmOut *cable_pwm_out;
-
 /**
  * @brief Set the PWM output pins.
  * 
