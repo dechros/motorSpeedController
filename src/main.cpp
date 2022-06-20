@@ -11,18 +11,18 @@
 
 #include <mbed.h>
 
-#include "globals/enums.h"
-#include "globals/variables.h"
-#include "pwm_generator/pwm_generator.h"
-#include "serial_output/serial_output.h"
+#include "enums.h"
+#include "variables.h"
+#include "serial_output.h"
+#include "pwm_generator.h"
 
 void pwm_input_rise();
 
 int main()
 {
     serial_set_pins(USBTX, USBRX);
-    pwm_set_pins(LED1, D3);
-    pwm_start_thread();
+    pwm_generator_set_pins(LED1, D3);
+    pwm_generator_start_thread();
     input.rise(&pwm_input_rise);
     ThisThread::sleep_for(osWaitForever);
 }

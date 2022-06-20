@@ -1,7 +1,7 @@
 /**
  * @file pwm_generator.h
  * @author Halit Cetin (halit.cetin@alten.com)
- * @brief This file includes PWM Generator definitions.
+ * @brief This file includes PWM generator definitions.
  * @version 0.1
  * @date 2022-06-14
  * 
@@ -13,10 +13,9 @@
 #define PWM_GENERATOR_H
 
 #include <mbed.h>
-#include <vector>
 
-#include "globals/variables.h"
-#include "serial_output/serial_output.h"
+#include "variables.h"
+#include "serial_output.h"
 
 /**
  * @brief Used for deciding if the PWM generator task rising the PWM 
@@ -30,8 +29,8 @@ enum PWM_PERIOD_DIR
     FALLING_DIR
 };
 
-extern Thread thread;
-extern Mutex pwm_mutex;
+extern Thread pwm_generate_thread;
+extern Mutex pwm_generate_mutex;
 extern PwmOut *led_pwm_out;
 extern PwmOut *cable_pwm_out;
 
@@ -41,7 +40,7 @@ extern PwmOut *cable_pwm_out;
  * @param led_pin LED PWM pin
  * @param cable_pin Measurement PWM pin
  */
-void pwm_set_pins(PinName led_pin, PinName cable_pin);
+void pwm_generator_set_pins(PinName led_pin, PinName cable_pin);
 
 /**
  * @brief PWM generator thread.
@@ -50,12 +49,12 @@ void pwm_set_pins(PinName led_pin, PinName cable_pin);
  * as PWM. It is important that we are not changing the duty cycle. We are 
  * changing the period of the PWM signal.
  */
-void pwm_thread();
+void pwm_generator_thread();
 
 /**
  * @brief Starts the related thread.
  * 
  */
-void pwm_start_thread();
+void pwm_generator_start_thread();
 
 #endif 

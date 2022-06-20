@@ -9,7 +9,7 @@
  * 
  */
 
-#include "globals/variables.h"
+#include "variables.h"
 
 volatile bool interrupted = false;
 InterruptIn input(D8);

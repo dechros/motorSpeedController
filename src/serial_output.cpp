@@ -1,7 +1,7 @@
 /**
  * @file serial_output.cpp
  * @author Halit Cetin (halit.cetin@alten.com)
- * @brief This file includes serial_hardware output class related declerations.
+ * @brief This file includes serial output related declerations.
  * @version 0.1
  * @date 2022-06-15
  *
@@ -9,7 +9,7 @@
  *
  */
 
-#include "serial_output/serial_output.h"
+#include "serial_output.h"
 
 Mutex serial_mutex;
 UnbufferedSerial *serial_hardware;

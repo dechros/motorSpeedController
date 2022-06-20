@@ -1,7 +1,7 @@
 /**
  * @file pwm_generator.cpp
  * @author Halit Cetin (halit.cetin@alten.com)
- * @brief This file includes PWM Generator class related declerations.
+ * @brief This file includes PWM generator related declerations.
  * @version 0.1
  * @date 2022-06-14
  *
@@ -9,36 +9,43 @@
  *
  */
 
-#include "pwm_generator/pwm_generator.h"
+#include "pwm_generator.h"
 
-Thread thread;
-Mutex pwm_mutex;
-PwmOut *led_pwm_out;
-PwmOut *cable_pwm_out;
+Thread pwm_generate_thread;
+Mutex pwm_generate_mutex;
+PwmOut *led_pwm_out = NULL;
+PwmOut *cable_pwm_out = NULL;
 
-void pwm_set_pins(PinName led_pin, PinName cable_pin)
+void pwm_generator_set_pins(PinName led_pin, PinName cable_pin)
 {
-    pwm_mutex.lock();
+    pwm_generate_mutex.lock();
     led_pwm_out = new PwmOut(led_pin);
     cable_pwm_out = new PwmOut(cable_pin);
-    pwm_mutex.unlock();
-    serial_write("PWM pins are initialized.");
+    pwm_generate_mutex.unlock();
+    serial_write("PWM generator pins are initialized.");
 }
 
-void pwm_start_thread()
+void pwm_generator_start_thread()
 {
-    thread.start(pwm_thread);
-    serial_write("PWM generator thread is started.");
+    if (led_pwm_out == NULL || cable_pwm_out == NULL)
+    {
+        serial_write("  ## Null pin error.");
+    }
+    else
+    {
+        pwm_generate_thread.start(pwm_generator_thread);
+        serial_write("PWM generator thread is started.");
+    }
 }
 
-void pwm_thread()
+void pwm_generator_thread()
 {
     PWM_PERIOD_DIR pwm_dir = RISING_DIR;
     int pwm_period_ms = 0;
 
     while (true)
     {
-        pwm_mutex.lock();
+        pwm_generate_mutex.lock();
         if (pwm_dir == RISING_DIR)
         {
             if (pwm_period_ms < 100)
@@ -69,7 +76,7 @@ void pwm_thread()
         led_pwm_out->write(0.50f);
         cable_pwm_out->period_ms(pwm_period_ms);
         cable_pwm_out->write(0.50f);
-        pwm_mutex.unlock();
+        pwm_generate_mutex.unlock();
         ThisThread::sleep_for(pwm_period_ms);
     }
 }
