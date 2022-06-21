@@ -12,6 +12,10 @@
 #include <mbed.h>
 #include <EthernetInterface.h>
 #include <TCPSocket.h>
+#include <stdio.h>
+#include <errno.h>
+#include <functional>
+#include <BlockDevice.h>
 
 #include "enums.h"
 #include "variables.h"
@@ -34,6 +38,11 @@ char txBuf[512] = {0};
 
 DigitalOut internet_led(LED2);
 
+/* SD Card Related */
+
+void ethernet_loop();
+void sd_card_loop();
+
 int main()
 {
     internet_led.write(1);
@@ -42,7 +51,18 @@ int main()
     pwm_generator_start_thread();
     pwm_capturing_set_pin(D8);
     pwm_capturing_start_thread();
+    /* ethernet_loop(); */
+    sd_card_loop();
+    ThisThread::sleep_for(osWaitForever);
+}
 
+void sd_card_loop()
+{
+
+}
+
+void ethernet_loop()
+{
     net = new EthernetInterface;
     if (net == NULL)
     {
@@ -90,29 +110,37 @@ int main()
         }
         else
         {
+            clientSocket->getpeername(&clientAddress);
+            string client_ip(clientAddress.get_ip_address());
+            serial_write("Connected. IP : " + client_ip);
             error = clientSocket->recv(rxBuf, sizeof(rxBuf));
             if (error > 0)
             {
                 string received_data(rxBuf);
                 string led_toggle_command = "led_toggle";
-                // serial_write("Received Data : " + received_data);
+                serial_write("Received Data : " + received_data);
                 if (received_data.find(led_toggle_command) != std::string::npos)
                 {
                     internet_led.write(!internet_led.read());
+
+                    string web_string = "HTTP/1.1 200 OK\n...\nAccess-Control-Allow-Origin: http://192.168.0.31\n";
+                    const char *message = web_string.c_str();
+                    clientSocket->send(message, strlen(message));
+
+                    web_string = "Halit";
+                    const char *message2 = web_string.c_str();
+                    clientSocket->send(message2, strlen(message2));
+                }
+                else
+                {
+                    string web_button = "<button onclick=\"location.href='http://192.168.0.31/led_toggle'\" type=\"button\"> Click Me </button>";
+                    const char *message = web_button.c_str();
+                    clientSocket->send(message, strlen(message));
                 }
             }
-            clientSocket->getpeername(&clientAddress);
-            string client_ip(clientAddress.get_ip_address());
-            serial_write("Connected. IP : " + client_ip);
-            string web_button = "<button onclick=\"location.href='http://192.168.0.31/led_toggle'\" type=\"button\"> Click Me </button>";
-            const char *message = web_button.c_str();
-            clientSocket->send(message, strlen(message));
             clientSocket->close();
             serial_write("Closed the connection.");
-            ThisThread::sleep_for(500);
         }
         ThisThread::yield();
     }
-
-    ThisThread::sleep_for(osWaitForever);
 }
