@@ -57,12 +57,14 @@ void serial_test_loop()
 {
     while (true)
     {
-        serial_write_esp("Naber");
+        serial_write_esp("From STM32 to ESP32");
+        serial_write("STM32 sent a message.");
         if (serial_readable_esp() == true)
         {
-            serial_write(serial_read_esp());
+            serial_write("STM32 received a message.");
+            serial_write("Message is : " + serial_read_esp());
         }
-        ThisThread::sleep_for(500);
+        ThisThread::sleep_for(1000);
     }
 }
 
