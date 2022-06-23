@@ -13,9 +13,7 @@
 #include <EthernetInterface.h>
 #include <TCPSocket.h>
 #include <stdio.h>
-#include <errno.h>
-#include <functional>
-#include <BlockDevice.h>
+#include <iostream>
 
 #include "enums.h"
 #include "variables.h"
@@ -38,27 +36,34 @@ char txBuf[512] = {0};
 
 DigitalOut internet_led(LED2);
 
-/* SD Card Related */
-
 void ethernet_loop();
-void sd_card_loop();
+void serial_test_loop();
 
 int main()
 {
     internet_led.write(1);
     serial_set_pins(USBTX, USBRX);
+    serial_set_pins_esp(D1, D0);
     pwm_generator_set_pins(LED1, D3);
     pwm_generator_start_thread();
     pwm_capturing_set_pin(D8);
     pwm_capturing_start_thread();
     /* ethernet_loop(); */
-    sd_card_loop();
+    serial_test_loop();
     ThisThread::sleep_for(osWaitForever);
 }
 
-void sd_card_loop()
+void serial_test_loop()
 {
-
+    while (true)
+    {
+        serial_write_esp("Naber");
+        if (serial_readable_esp() == true)
+        {
+            serial_write(serial_read_esp());
+        }
+        ThisThread::sleep_for(500);
+    }
 }
 
 void ethernet_loop()
