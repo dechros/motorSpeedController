@@ -20,6 +20,7 @@
 #include "serial_output.h"
 #include "pwm_generator.h"
 #include "pwm_capturing.h"
+#include "data_manager.h"
 
 #define IP "192.168.0.31"
 #define GATEWAY "192.168.0.1"
@@ -37,35 +38,19 @@ char txBuf[512] = {0};
 DigitalOut internet_led(LED2);
 
 void ethernet_loop();
-void serial_test_loop();
 
 int main()
 {
     internet_led.write(1);
     serial_set_pins(USBTX, USBRX);
     serial_set_pins_esp(D1, D0);
+    data_manager_start_thread();
     pwm_generator_set_pins(LED1, D3);
     pwm_generator_start_thread();
     pwm_capturing_set_pin(D8);
     pwm_capturing_start_thread();
     /* ethernet_loop(); */
-    serial_test_loop();
     ThisThread::sleep_for(osWaitForever);
-}
-
-void serial_test_loop()
-{
-    while (true)
-    {
-        serial_write_esp("From STM32 to ESP32");
-        serial_write("STM32 sent a message.");
-        if (serial_readable_esp() == true)
-        {
-            serial_write("STM32 received a message.");
-            serial_write("Message is : " + serial_read_esp());
-        }
-        ThisThread::sleep_for(1000);
-    }
 }
 
 void ethernet_loop()
