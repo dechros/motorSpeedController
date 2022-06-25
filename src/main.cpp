@@ -43,7 +43,7 @@ int main()
 {
     internet_led.write(1);
     serial_set_pins(USBTX, USBRX);
-    serial_set_pins_esp(D1, D0);
+    serial_set_pins_esp_sd(D1, D0);
     data_manager_start_thread();
     pwm_generator_set_pins(LED1, D3);
     pwm_generator_start_thread();
