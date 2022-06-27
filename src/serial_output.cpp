@@ -65,7 +65,7 @@ bool serial_readable_esp_sd()
     return ret_val;
 }
 
-std::string serial_read_esp_sd()
+std::string serial_read_esp_sd(int message_size)
 {
     serial_mutex_esp_sd.lock();
     std::string ret_str = "  ## Null serial_hardware_esp_sd error.";
@@ -77,6 +77,10 @@ std::string serial_read_esp_sd()
             char incoming_char;
             serial_hardware_esp_sd->read(&incoming_char, 1);
             ret_str += incoming_char;
+            if (ret_str.size() >= message_size)
+            {
+                break;
+            }
         }
     }
     serial_mutex_esp_sd.unlock();

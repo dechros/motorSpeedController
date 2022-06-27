@@ -16,7 +16,7 @@
 #include <string>
 #include <iostream>
 #include <sstream>
-    
+
 /**
  * @brief Set the UART com pins.
  * 
@@ -57,9 +57,10 @@ bool serial_readable_esp_sd();
 
 /**
  * @brief Reads serial data from ESP32 SD.
- * 
+ *  
+ * @param message_size Size of the readable data
  * @return std::string Incoming message
  */
-std::string serial_read_esp_sd();
+std::string serial_read_esp_sd(int message_size = 256);
 
 #endif

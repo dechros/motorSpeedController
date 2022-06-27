@@ -13,6 +13,9 @@
 #define DATA_MANAGER_H
 
 #include <mbed.h>
+#include <EthernetInterface.h>
+#include <TCPSocket.h>
+#include <stdio.h>
 
 #include "variables.h"
 #include "serial_output.h"
@@ -21,11 +24,16 @@
 #define READ_RPM_HEADER "R-RPM-"
 #define READ_WEBSITE_HEADER "R-WEB-"
 #define ERROR_MESSAGE_HEADER "ERROR-"
-#define MESSAGE_FOOTER "-H"
+#define MESSAGE_FOOTER "-H-END"
 
-#define MIN_TIMEOUT_MS 1
-#define MAX_TIMEOUT_MS 250
+#define MIN_TIMEOUT_MS 100
+#define MAX_TIMEOUT_COUNT 2
 #define MAX_MESSAGE_TRY 10
+
+#define IP "192.168.0.31"
+#define GATEWAY "192.168.0.1"
+#define NETMASK "255.255.255.0"
+#define PORT 80
 
 /**
  * @brief Message type that goes to ESP32
@@ -38,6 +46,12 @@ enum MESAGE_TYPE
     READ_RPM,
     READ_WEBSITE
 };
+
+/**
+ * @brief Sets the ethernet interface,
+ * 
+ */
+void set_ethernet_interface();
 
 /**
  * @brief Starts related data manager thread.
@@ -78,15 +92,25 @@ std::string web_read_esp_sd(std::string website_name, int starting_index, int re
 std::string write_message_type_header(MESAGE_TYPE message_type);
 
 /**
+ * @brief Strips the message from header and footer.
+ * 
+ * @param main_string Incoming message
+ * @param header Search string
+ * @param footer Search string
+ * @return std::string Stripped message
+ */
+std::string strip_the_message(std::string main_string, std::string header, std::string footer);
+
+/**
  * @brief Checks if mesage is correct.
  * 
  * @param main_string Incoming message
- * @param sub_string_1 Search string
- * @param sub_string_2 Search string
+ * @param header Search string
+ * @param footer Search string
  * @return true Message is correct
  * @return false Message is not correct
  */
-bool check_message_integrity(std::string main_string, std::string sub_string_1, std::string sub_string_2);
+bool check_message_integrity(std::string main_string, std::string header, std::string footer);
 
 /**
  * @brief Waits until timeout. Use this after sendinga message.
