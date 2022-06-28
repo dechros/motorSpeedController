@@ -15,5 +15,7 @@
 #include <mbed.h>
 
 extern bool example;
+extern Mutex rpm_mutex;
+extern std::string rpm_string;
 
 #endif

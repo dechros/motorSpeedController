@@ -11,8 +11,8 @@
 
 #include "pwm_generator.h"
 
-#define PWM_PERIOD_MAX 100
-#define PWM_PERIOD_MIN 1
+#define PWM_PERIOD_MAX 8000
+#define PWM_PERIOD_MIN 2000
 
 Thread pwm_generate_thread;
 Mutex pwm_generate_mutex;
@@ -44,16 +44,16 @@ void pwm_generator_start_thread()
 void pwm_generator_thread()
 {
     PWM_PERIOD_DIR pwm_dir = RISING_DIR;
-    int pwm_period_ms = 0;
+    int pwm_period_us = PWM_PERIOD_MIN;
 
     while (true)
     {
         pwm_generate_mutex.lock();
         if (pwm_dir == RISING_DIR)
         {
-            if (pwm_period_ms < PWM_PERIOD_MAX)
+            if (pwm_period_us < PWM_PERIOD_MAX)
             {
-                pwm_period_ms++;
+                pwm_period_us += 1000;
             }
             else
             {
@@ -62,9 +62,9 @@ void pwm_generator_thread()
         }
         else if (pwm_dir == FALLING_DIR)
         {
-            if (pwm_period_ms > PWM_PERIOD_MIN)
+            if (pwm_period_us > PWM_PERIOD_MIN)
             {
-                pwm_period_ms--;
+                pwm_period_us -= 1000;
             }
             else
             {
@@ -75,11 +75,11 @@ void pwm_generator_thread()
         {
             serial_write("  ## Led direction error.");
         }
-        led_pwm_out->period_ms(pwm_period_ms);
+        led_pwm_out->period_us(pwm_period_us);
         led_pwm_out->write(0.50f);
-        cable_pwm_out->period_ms(pwm_period_ms);
+        cable_pwm_out->period_us(pwm_period_us);
         cable_pwm_out->write(0.50f);
         pwm_generate_mutex.unlock();
-        ThisThread::sleep_for(PWM_PERIOD_MAX);
+        ThisThread::sleep_for(100);
     }
 }

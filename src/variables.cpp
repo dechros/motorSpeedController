@@ -12,3 +12,5 @@
 #include "variables.h"
 
 bool example = false;
+Mutex rpm_mutex;
+std::string rpm_string;

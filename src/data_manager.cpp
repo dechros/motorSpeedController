@@ -87,16 +87,6 @@ void data_managing_thread()
             data_manager_mutex.unlock();
             continue;
         }
-        int eclapsed_time_us = ip_timer.read_us();
-        serial_write("Eclapsed time since last connection : " + to_string(eclapsed_time_us));
-        if (eclapsed_time_us < 3000000 && eclapsed_time_us > 0)
-        {
-            serial_write("  ## To fast connection.");
-            clientSocket->close();
-            serial_write("Closed the connection.");
-            data_manager_mutex.unlock();
-            continue;
-        }
         clientSocket->getpeername(&clientAddress);
         string client_ip(clientAddress.get_ip_address());
         serial_write("Connected. IP : " + client_ip);
@@ -111,37 +101,63 @@ void data_managing_thread()
             continue;
         }
         string received_data(rxBuf);
-        string led_toggle_command = "led_toggle";
         /* serial_write("Received Data : " + received_data); */
-        if (received_data.find(led_toggle_command) != std::string::npos)
+        if (received_data.find("led_toggle") != std::string::npos)
         {
+            serial_write("Message : led_toggle");
             internet_led.write(!internet_led.read());
-
-            string web_string = "HTTP/1.1 200 OK\n...\nAccess-Control-Allow-Origin: http://192.168.0.31\n";
-            const char *message = web_string.c_str();
-            clientSocket->send(message, strlen(message));
-
-            web_string = "Halit";
+            string web_string = "Halit";
             const char *message2 = web_string.c_str();
             clientSocket->send(message2, strlen(message2));
         }
+        else if (received_data.find("refresh_graph") != std::string::npos)
+        {
+            string web_string = REFRESH_GRAPH_HEADER;
+            serial_write("Message : refresh_graph");
+            bool rpm_string_has_data = false;
+            rpm_mutex.lock();
+            if (rpm_string.length() > 0)
+            {
+                rpm_string_has_data = true;
+            }
+            web_string += rpm_string;
+            rpm_string = "";
+            rpm_mutex.unlock();
+            web_string += WEB_MESSAGE_FOOTER;
+            /* serial_write(web_string); */
+            if (rpm_string_has_data == true)
+            {
+                const char *message3 = web_string.c_str();
+                clientSocket->send(message3, strlen(message3));
+            }
+        }
         else
         {
-            serial_write("File transfer started.");
-            for (int i = 0; i < 200; i += 200)
+            int eclapsed_time_us = ip_timer.read_us();
+            serial_write("Eclapsed time since last connection : " + to_string(eclapsed_time_us));
+            if (eclapsed_time_us < 3000000 && eclapsed_time_us > 0)
             {
-                incoming_message = web_read_esp_sd("simple.txt", i, 200);
+                serial_write("  ## To fast connection.");
+                clientSocket->close();
+                serial_write("Closed the connection.");
+                data_manager_mutex.unlock();
+                continue;
+            }
+            serial_write("File transfer started.");
+            for (int i = 0; i < 200000; i += 200)
+            {
+                incoming_message = web_read_esp_sd("index.html", i, 200);
                 /* serial_write("STM32 received a message : " + incoming_message); */
                 serial_write(to_string(i));
                 const char *message = incoming_message.c_str();
                 clientSocket->send(message, strlen(message));
             }
             serial_write("File transfer completed.");
+            ip_timer.reset();
+            ip_timer.start();
         }
         clientSocket->close();
         serial_write("Closed the connection.");
-        ip_timer.reset();
-        ip_timer.start();
         data_manager_mutex.unlock();
     }
 }
