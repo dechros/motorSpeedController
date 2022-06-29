@@ -55,7 +55,7 @@ void pwm_capturing_thread()
         int rpm = pulse_counter * 600;
         pulse_counter = 0;
         rpm_mutex.lock();
-        if (rpm_string.length() > 500)
+        if (rpm_string.length() > 200)
         {
             rpm_string = "";
         }

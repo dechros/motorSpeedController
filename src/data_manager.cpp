@@ -124,7 +124,7 @@ void data_managing_thread()
             rpm_string = "";
             rpm_mutex.unlock();
             web_string += WEB_MESSAGE_FOOTER;
-            /* serial_write(web_string); */
+            serial_write(web_string);
             if (rpm_string_has_data == true)
             {
                 const char *message3 = web_string.c_str();
