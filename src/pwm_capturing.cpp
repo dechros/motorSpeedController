@@ -61,7 +61,7 @@ void pwm_capturing_thread()
         }
         rpm_string += to_string(rpm) + "-";
         rpm_mutex.unlock();
-        /* serial_write("rpm : " + to_string(rpm)); */ 
+        /* serial_write("rpm : " + to_string(rpm)); */
         pwm_capture_mutex.unlock();
         ThisThread::sleep_for(100);
     }

@@ -23,13 +23,14 @@ SocketAddress gateway;
 char rxBuf[512] = {0};
 char txBuf[512] = {0};
 
+BlockDevice *device;
+FATFileSystem fs("fs");
+
 DigitalOut internet_led(LED2);
 Timer ip_timer;
 
 Thread data_manager_thread;
 Mutex data_manager_mutex;
-
-void ethernet_loop();
 
 void set_ethernet_interface()
 {
@@ -62,6 +63,20 @@ void set_ethernet_interface()
     server.open(net);
     server.bind(ip);
     server.listen(5);
+}
+
+void set_sd_card(PinName mosi, PinName miso, PinName sclk, PinName cs)
+{
+    device = new SDBlockDevice(mosi, miso, sclk, cs);
+    int err = fs.mount(device);
+    if (err == 0)
+    {
+        serial_write("SD card init OK.");
+    }
+    else
+    {
+        serial_write("  ## SD card init error!");
+    }
 }
 
 void data_manager_start_thread()
@@ -144,11 +159,11 @@ void data_managing_thread()
                 continue;
             }
             serial_write("File transfer started.");
-            for (int i = 0; i < 200000; i += 200)
+            for (int i = 0; i < 180000; i += 200)
             {
-                incoming_message = web_read_esp_sd("index.html", i, 200);
-                /* serial_write("STM32 received a message : " + incoming_message); */
-                serial_write(to_string(i));
+                incoming_message = file_read("index.html", i, 200);
+                /* serial_write("File : " + incoming_message); */
+                /* serial_write(to_string(i)); */
                 const char *message = incoming_message.c_str();
                 clientSocket->send(message, strlen(message));
             }
@@ -162,115 +177,17 @@ void data_managing_thread()
     }
 }
 
-std::string web_read_esp_sd(std::string file_name, int starting_index, int read_size)
+std::string file_read(std::string file_name, int starting_index, int read_size)
 {
-    std::string incoming_message;
-    std::string sent_message;
-    sent_message += READ_WEBSITE_HEADER;
-    sent_message += file_name + "-";
-    sent_message += to_string(starting_index) + "-";
-    sent_message += to_string(read_size) + MESSAGE_FOOTER;
-
-    int message_sent_count = 0;
-    bool message_integrity = false;
-    while (true)
+    std::string ret_str;
+    file_name = "/fs/" + file_name;
+    FILE *file = fopen(file_name.c_str(), "r+");
+    fseek(file, starting_index, SEEK_SET);
+    while (ret_str.length() < read_size)
     {
-        serial_write_esp_sd(sent_message);
-        /* serial_write("STM32 sent a message."); */
-        /* serial_write("STM32 sent a message : " + sent_message); */
-        message_sent_count++;
-        if (message_sent_count > MAX_MESSAGE_TRY)
-        {
-            serial_write("  ## Serial com maximum try error.");
-            message_integrity = false;
-            break;
-        }
-        if (is_message_timed_out() == true)
-        {
-            serial_write("  ## Serial com timeout error.");
-            ThisThread::sleep_for(100);
-            continue;
-        }
-        incoming_message = serial_read_esp_sd(std::string(READ_WEBSITE_HEADER).size());
-        while (true)
-        {
-            if (incoming_message.compare(READ_WEBSITE_HEADER) == 0)
-            {
-                incoming_message += serial_read_esp_sd();
-                break;
-            }
-            else
-            {
-                incoming_message.erase(incoming_message.begin());
-                int size_old = incoming_message.size();
-                incoming_message += serial_read_esp_sd(1);
-                if (size_old == incoming_message.size())
-                {
-                    break;
-                }
-            }
-        }
-        message_integrity = check_message_integrity(incoming_message, READ_WEBSITE_HEADER, MESSAGE_FOOTER);
-        if (message_integrity == false)
-        {
-            serial_write("  ## Serial com message integrity error. : " + incoming_message);
-            ThisThread::sleep_for(100);
-            continue;
-        }
-        else
-        {
-            incoming_message = strip_the_message(incoming_message, READ_WEBSITE_HEADER, MESSAGE_FOOTER);
-            break;
-        }
+        ret_str += fgetc(file);
     }
-    return incoming_message;
-}
-
-std::string strip_the_message(std::string main_string, std::string header, std::string footer)
-{
-    main_string = main_string.erase(0, header.size());
-    main_string = main_string.erase(main_string.length() - footer.length(), footer.size());
-    return main_string;
-}
-
-bool check_message_integrity(std::string main_string, std::string header, std::string footer)
-{
-    bool ret_val;
-    int header_pos = main_string.find(header);
-    int footer_pos = main_string.find(footer);
-    if ((header_pos == 0) && (footer_pos == (int)(main_string.length() - footer.length())))
-    {
-        ret_val = true;
-    }
-    else
-    {
-        ret_val = false;
-    }
-    return ret_val;
-}
-
-bool is_message_timed_out()
-{
-    ThisThread::sleep_for(MIN_TIMEOUT_MS);
-    int wait_count = 0;
-    while (serial_readable_esp_sd() == false)
-    {
-        ThisThread::sleep_for(MIN_TIMEOUT_MS);
-        wait_count++;
-        if (wait_count >= MAX_TIMEOUT_COUNT)
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
-void ethernet_loop()
-{
-
-    while (true)
-    {
-
-        ThisThread::yield();
-    }
+    fclose(file);
+    fflush(file);
+    return ret_str;
 }

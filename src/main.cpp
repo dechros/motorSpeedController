@@ -19,11 +19,14 @@
 #include "pwm_capturing.h"
 #include "data_manager.h"
 
+
+
 int main()
 {
     serial_set_pins(USBTX, USBRX);
+    set_sd_card(PB_5, PB_4, PB_3, PA_4);
     serial_set_pins_esp_sd(D1, D0);
-    pwm_generator_set_pins(LED1, D3);
+    pwm_generator_set_pins(LED1, D9);
     pwm_generator_start_thread();
     pwm_capturing_set_pin(D8);
     pwm_capturing_start_thread();
