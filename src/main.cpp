@@ -11,6 +11,8 @@
 
 #include <mbed.h>
 #include <iostream>
+#include <stdlib.h>
+#include <stdio.h>
 
 #include "enums.h"
 #include "variables.h"
@@ -18,8 +20,6 @@
 #include "pwm_generator.h"
 #include "pwm_capturing.h"
 #include "data_manager.h"
-
-
 
 int main()
 {

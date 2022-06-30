@@ -18,7 +18,6 @@
 #include <stdio.h>
 #include <SDBlockDevice.h>
 #include <FATFileSystem.h>
-#include <fstream>
 
 #include "variables.h"
 #include "serial_output.h"
