@@ -97,79 +97,79 @@ void data_managing_thread()
         if (error != 0)
         {
             serial_write("  ## Connection error.");
-            clientSocket->close();
-            serial_write("Closed the connection.");
-            data_manager_mutex.unlock();
-            continue;
-        }
-        clientSocket->getpeername(&clientAddress);
-        string client_ip(clientAddress.get_ip_address());
-        serial_write("Connected. IP : " + client_ip);
-        clientSocket->set_timeout(1000);
-        error = clientSocket->recv(rxBuf, sizeof(rxBuf));
-        if (error <= 0)
-        {
-            serial_write("  ## Data receive error.");
-            clientSocket->close();
-            serial_write("Closed the connection.");
-            data_manager_mutex.unlock();
-            continue;
-        }
-        string received_data(rxBuf);
-        /* serial_write("Received Data : " + received_data); */
-        if (received_data.find("led_toggle") != std::string::npos)
-        {
-            serial_write("Message : led_toggle");
-            internet_led.write(!internet_led.read());
-            string web_string = "Halit";
-            const char *message2 = web_string.c_str();
-            clientSocket->send(message2, strlen(message2));
-        }
-        else if (received_data.find("refresh_graph") != std::string::npos)
-        {
-            string web_string = REFRESH_GRAPH_HEADER;
-            serial_write("Message : refresh_graph");
-            bool rpm_string_has_data = false;
-            rpm_mutex.lock();
-            if (rpm_string.length() > 0)
-            {
-                rpm_string_has_data = true;
-            }
-            web_string += rpm_string;
-            rpm_string = "";
-            rpm_mutex.unlock();
-            web_string += WEB_MESSAGE_FOOTER;
-            serial_write(web_string);
-            if (rpm_string_has_data == true)
-            {
-                const char *message3 = web_string.c_str();
-                clientSocket->send(message3, strlen(message3));
-            }
         }
         else
         {
-            int eclapsed_time_us = ip_timer.read_us();
-            serial_write("Eclapsed time since last connection : " + to_string(eclapsed_time_us));
-            if (eclapsed_time_us < 3000000 && eclapsed_time_us > 0)
+            clientSocket->getpeername(&clientAddress);
+            string client_ip(clientAddress.get_ip_address());
+            serial_write("Connected. IP : " + client_ip);
+            clientSocket->set_timeout(1000);
+            error = clientSocket->recv(rxBuf, sizeof(rxBuf));
+            if (error <= 0)
             {
-                serial_write("  ## To fast connection.");
-                clientSocket->close();
-                serial_write("Closed the connection.");
-                data_manager_mutex.unlock();
-                continue;
+                serial_write("  ## Data receive error.");
             }
-            serial_write("File transfer started.");
-            for (int i = 0; i < 180000; i += 200)
+            else
             {
-                incoming_message = file_read("index.html", i, 200);
-                /* serial_write("File : " + incoming_message); */
-                /* serial_write(to_string(i)); */
-                const char *message = incoming_message.c_str();
-                clientSocket->send(message, strlen(message));
+                string received_data(rxBuf);
+                /* serial_write("Received Data : " + received_data); */
+                if (received_data.find("refresh_graph") != std::string::npos)
+                {
+                    string web_string = REFRESH_GRAPH_HEADER;
+                    int time_out = 0;
+                    while (true)
+                    {
+                        time_out++;
+                        rpm_mutex.lock();
+                        if (rpm_string.length() > 0)
+                        {
+                            web_string += rpm_string;
+                            rpm_string = "";
+                            rpm_mutex.unlock();
+                            break;
+                        }
+                        else if (time_out >= 100)
+                        {
+                            web_string = "0-";
+                            rpm_mutex.unlock();
+                            break;
+                        }
+                        else
+                        {
+                            ThisThread::sleep_for(1);
+                        }
+                        rpm_mutex.unlock();
+                    }
+                    web_string += WEB_MESSAGE_FOOTER;
+                    const char *message3 = web_string.c_str();
+                    clientSocket->send(message3, strlen(message3));
+                    serial_write("Web Message = " + web_string);
+                }
+                else
+                {
+                    int eclapsed_time_us = ip_timer.read_us();
+                    serial_write("Eclapsed time since last connection : " + to_string(eclapsed_time_us));
+                    if (eclapsed_time_us < 3000000 && eclapsed_time_us > 0)
+                    {
+                        serial_write("  ## To fast connection.");
+                    }
+                    else
+                    {
+                        serial_write("File transfer started.");
+                        for (int i = 0; i < 180000; i += 200)
+                        {
+                            incoming_message = file_read("index.html", i, 200);
+                            /* serial_write("File : " + incoming_message); */
+                            /* serial_write(to_string(i)); */
+                            const char *message = incoming_message.c_str();
+                            clientSocket->send(message, strlen(message));
+                        }
+                        serial_write("File transfer completed.");
+                        ip_timer.reset();
+                        ip_timer.start();
+                    }
+                }
             }
-            serial_write("File transfer completed.");
-            ip_timer.reset();
-            ip_timer.start();
         }
         clientSocket->close();
         serial_write("Closed the connection.");

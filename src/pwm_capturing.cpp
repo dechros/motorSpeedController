@@ -48,18 +48,13 @@ void pwm_input_rise()
 
 void pwm_capturing_thread()
 {
-    int rpm = 0;
     while (true)
     {
         pwm_capture_mutex.lock();
         int rpm = pulse_counter * 600;
         pulse_counter = 0;
         rpm_mutex.lock();
-        if (rpm_string.length() > 200)
-        {
-            rpm_string = "";
-        }
-        rpm_string += to_string(rpm) + "-";
+        rpm_string = to_string(rpm) + "-";
         rpm_mutex.unlock();
         /* serial_write("rpm : " + to_string(rpm)); */
         pwm_capture_mutex.unlock();

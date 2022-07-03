@@ -44,13 +44,13 @@ enum MESAGE_TYPE
 
 /**
  * @brief Sets the ethernet interface,
- * 
+ *
  */
 void set_ethernet_interface();
 
 /**
  * @brief Sets SD card SPI interface
- * 
+ *
  * @param mosi Pin
  * @param miso Pin
  * @param sclk Pin
@@ -80,11 +80,11 @@ void data_managing_thread();
 
 /**
  * @brief Reads file from SD card.
- * 
+ *
  * @param file_name File to be read
  * @param starting_index File reading starting index
  * @param read_size File read char size
- * @return std::string 
+ * @return std::string
  */
 std::string file_read(std::string website_name, int starting_index, int read_size);
 
