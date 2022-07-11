@@ -23,11 +23,9 @@ SocketAddress gateway;
 char rxBuf[512] = {0};
 char txBuf[512] = {0};
 
-BlockDevice *device;
-FATFileSystem fs("fs");
-
 DigitalOut internet_led(LED2);
-Timer ip_timer;
+Timer website_timer;
+Timer socket_timer;
 
 Thread data_manager_thread;
 Mutex data_manager_mutex;
@@ -65,20 +63,6 @@ void set_ethernet_interface()
     server.listen(5);
 }
 
-void set_sd_card(PinName mosi, PinName miso, PinName sclk, PinName cs)
-{
-    device = new SDBlockDevice(mosi, miso, sclk, cs);
-    int err = fs.mount(device);
-    if (err == 0)
-    {
-        serial_write("SD card init OK.");
-    }
-    else
-    {
-        serial_write("  ## SD card init error!");
-    }
-}
-
 void data_manager_start_thread()
 {
     data_manager_thread.start(data_managing_thread);
@@ -91,10 +75,15 @@ void data_managing_thread()
     while (true)
     {
         data_manager_mutex.lock();
-        ThisThread::sleep_for(1);
         nsapi_error_t error = 0;
         clientSocket = server.accept(&error);
-        if (error != 0)
+        int eclapsed_time_us = socket_timer.read_us();
+        serial_write("Eclapsed time since last connection : " + to_string(eclapsed_time_us));
+        if (eclapsed_time_us < 100000 && eclapsed_time_us > 0)
+        {
+            serial_write("  ## To fast connection.");
+        }
+        else if (error != 0)
         {
             serial_write("  ## Connection error.");
         }
@@ -141,13 +130,36 @@ void data_managing_thread()
                         rpm_mutex.unlock();
                     }
                     web_string += WEB_MESSAGE_FOOTER;
-                    const char *message3 = web_string.c_str();
-                    clientSocket->send(message3, strlen(message3));
+                    const char *message = web_string.c_str();
+                    clientSocket->send(message, strlen(message));
+                    serial_write("Web Message = " + web_string);
+                }
+                else if (received_data.find("file_list") != std::string::npos)
+                {
+                    string web_string = FILE_LIST_HEADER;
+                    std::vector<std::string> file_list = get_file_list("");
+                    for (int i = 0; i < file_list.size(); i++)
+                    {
+                        web_string += file_list[i] + "-";
+                    }
+                    web_string += WEB_MESSAGE_FOOTER;
+                    const char *message = web_string.c_str();
+                    clientSocket->send(message, strlen(message));
+                    serial_write("Web Message = " + web_string);
+                }
+                else if (received_data.find("get_file") != std::string::npos)
+                {
+                    string file_name = get_file_name(received_data);
+                    string web_string = FILE_LIST_HEADER;
+                    web_string += file_read(file_name, 0, 4000);
+                    web_string += WEB_MESSAGE_FOOTER;
+                    const char *message = web_string.c_str();
+                    clientSocket->send(message, strlen(message));
                     serial_write("Web Message = " + web_string);
                 }
                 else
                 {
-                    int eclapsed_time_us = ip_timer.read_us();
+                    int eclapsed_time_us = website_timer.read_us();
                     serial_write("Eclapsed time since last connection : " + to_string(eclapsed_time_us));
                     if (eclapsed_time_us < 3000000 && eclapsed_time_us > 0)
                     {
@@ -165,29 +177,35 @@ void data_managing_thread()
                             clientSocket->send(message, strlen(message));
                         }
                         serial_write("File transfer completed.");
-                        ip_timer.reset();
-                        ip_timer.start();
+                        website_timer.reset();
+                        website_timer.start();
                     }
                 }
             }
         }
         clientSocket->close();
         serial_write("Closed the connection.");
+        socket_timer.reset();
+        socket_timer.start();
         data_manager_mutex.unlock();
+        ThisThread::sleep_for(10);
     }
 }
 
-std::string file_read(std::string file_name, int starting_index, int read_size)
+std::string get_file_name(std::string message)
 {
-    std::string ret_str;
-    file_name = "/fs/" + file_name;
-    FILE *file = fopen(file_name.c_str(), "r+");
-    fseek(file, starting_index, SEEK_SET);
-    while (ret_str.length() < read_size)
+    int file_name_index = message.find("get_file") + string("get_file").size();
+    string file_name = message.substr(file_name_index, 20);
+    while (file_name.length() > 0)
     {
-        ret_str += fgetc(file);
+        if (file_name[file_name.length() - 1] != 't')
+        {
+            file_name.erase(file_name.length() - 1, 1);
+        }
+        else
+        {
+            break;
+        }
     }
-    fclose(file);
-    fflush(file);
-    return ret_str;
+    return file_name;
 }

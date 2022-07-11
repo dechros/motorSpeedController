@@ -16,13 +16,13 @@
 #include <EthernetInterface.h>
 #include <TCPSocket.h>
 #include <stdio.h>
-#include <SDBlockDevice.h>
-#include <FATFileSystem.h>
 
 #include "variables.h"
 #include "serial_output.h"
+#include "sd_manager.h"
 
 #define REFRESH_GRAPH_HEADER "REF-"
+#define FILE_LIST_HEADER "FILE-"
 #define WEB_MESSAGE_FOOTER "WEB-END"
 
 #define IP "192.168.0.31"
@@ -43,20 +43,10 @@ enum MESAGE_TYPE
 };
 
 /**
- * @brief Sets the ethernet interface,
+ * @brief Sets the ethernet interface.
  *
  */
 void set_ethernet_interface();
-
-/**
- * @brief Sets SD card SPI interface
- *
- * @param mosi Pin
- * @param miso Pin
- * @param sclk Pin
- * @param cs Pin
- */
-void set_sd_card(PinName mosi, PinName miso, PinName sclk, PinName cs);
 
 /**
  * @brief Starts related data manager thread.
@@ -73,19 +63,11 @@ void data_manager_start_thread();
 void data_managing_thread();
 
 /**
- * @brief Sends file read request to ESP32 SD reader.
- *
- * @param website_name Website name to be read
+ * @brief Strips the file name from received message.
+ * 
+ * @param message Received message.
+ * @return std::string File name
  */
-
-/**
- * @brief Reads file from SD card.
- *
- * @param file_name File to be read
- * @param starting_index File reading starting index
- * @param read_size File read char size
- * @return std::string
- */
-std::string file_read(std::string website_name, int starting_index, int read_size);
+std::string get_file_name(std::string message);
 
 #endif

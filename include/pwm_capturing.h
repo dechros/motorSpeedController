@@ -16,6 +16,27 @@
 
 #include "variables.h"
 #include "serial_output.h"
+#include "sd_manager.h"
+
+#define CAPTURE_PERIOD 100
+#define CAP_FILE_EXTENTION ".txt"
+
+/**
+ * @brief Real date and time variables
+ * 
+ */
+struct date
+{
+    int day;
+    int hour;
+    int min;
+    int millisec;
+};
+
+/**
+ * @brief Sets time and date.
+ */
+void set_time_date();
 
 /**
  * @brief Set the PWM input pin.
@@ -43,5 +64,12 @@ void pwm_input_rise();
  * as PWM.
  */
 void pwm_capturing_thread();
+
+/**
+ * @brief Updates real time.
+ * 
+ * @param update_period Period to update the real time.
+ */
+void update_time(int update_period);
 
 #endif
