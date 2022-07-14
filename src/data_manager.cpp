@@ -25,7 +25,6 @@ char txBuf[512] = {0};
 
 DigitalOut internet_led(LED2);
 Timer website_timer;
-Timer socket_timer;
 
 Thread data_manager_thread;
 Mutex data_manager_mutex;
@@ -77,13 +76,7 @@ void data_managing_thread()
         data_manager_mutex.lock();
         nsapi_error_t error = 0;
         clientSocket = server.accept(&error);
-        int eclapsed_time_us = socket_timer.read_us();
-        serial_write("Eclapsed time since last connection : " + to_string(eclapsed_time_us));
-        if (eclapsed_time_us < 100000 && eclapsed_time_us > 0)
-        {
-            serial_write("  ## To fast connection.");
-        }
-        else if (error != 0)
+        if (error != 0)
         {
             serial_write("  ## Connection error.");
         }
@@ -185,8 +178,6 @@ void data_managing_thread()
         }
         clientSocket->close();
         serial_write("Closed the connection.");
-        socket_timer.reset();
-        socket_timer.start();
         data_manager_mutex.unlock();
         ThisThread::sleep_for(10);
     }

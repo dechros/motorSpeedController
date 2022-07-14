@@ -57,7 +57,7 @@ std::string file_read(std::string file_name, int starting_index, int read_size)
     }
     else
     {
-        serial_write("  ## File opening error.");
+        serial_write("  ## File opening error. 3");
     }
     fflush(file);
     sd_card.unlock();
@@ -80,7 +80,7 @@ void file_write(std::string data, std::string file_name, int starting_index)
     }
     else
     {
-        serial_write("  ## File opening error.");
+        serial_write("  ## File opening error. 2");
     }
     fflush(file);
     sd_card.unlock();
@@ -101,7 +101,7 @@ void file_append(std::string data, std::string file_name)
     }
     else
     {
-        serial_write("  ## File opening error.");
+        serial_write("  ## File opening error. 1");
     }
     fflush(file);
     sd_card.unlock();
